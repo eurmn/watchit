@@ -19,6 +19,7 @@ module.exports = {
 	},
   rules: {
     'quotes': ['error', 'single'],
-    'prefer-const': 0
+    'prefer-const': 0,
+    'semi': ['error', 'always'],
   }
 };
