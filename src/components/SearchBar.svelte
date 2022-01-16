@@ -22,7 +22,8 @@
 
 		searchTimeout = setTimeout(() => {
 			axios
-				.get(`https://yts.mx/api/v2/list_movies.json?query_term=${query}&sort_by=seeds`)
+				.get('https://yts.mx/api/v2/list_movies.json?query_term=' +
+          query + '&sort_by=seeds')
 				.then((response) => {
 					let list: Array<any> = response.data.data.movies;
 					movies = list
@@ -36,12 +37,12 @@
 									({ seedsA }: { seedsA: number }, { seedsB }: { seedsB: number }): number => {
 										return seedsB - seedsA;
 									}
-								)
+								).map(({ hash }: { hash: string }) => hash),
 							};
 						})
 						.sort((a, b) => {
 							return b.rating - a.rating;
-						});
+						});      
 				})
 				.catch(console.log);
 		}, 1000);
@@ -76,11 +77,11 @@
 	/>
 	{#if movies.length > 0 && searching}
 		<div
-			class="py-2 bg-white rounded-b-md sm:w-1/2 overflow-y-scroll text-slate-900"
+			class="py-2 bg-white w-full rounded-b-md sm:w-1/2 overflow-y-scroll text-slate-900"
 		>
 			{#each movies as movie, i}
 				<div
-					class="flex align-center p-2 h-25 bg-white hover:bg-gray-100
+					class="flex align-center w-full p-2 h-25 bg-white hover:bg-gray-100
           cursor-pointer"
 					data-index={i}
 					on:click={selectMovie}
