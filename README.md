@@ -2,6 +2,8 @@
 
 An attempt to create a very simple web app to download movies. It uses [webtorrent](https://github.com/webtorrent/webtorrent/) and [StreamSaver.js](https://github.com/jimmywarting/StreamSaver.js) to download the .mp4/.mkv files and [yts.mx](https://yts.mx/)'s API to find the hashes, titles and cover images.
 
+[Access Live Website](https://euromoon.github.io/watchit/)
+
 ## Important note:
 There are two main problems I am looking to solve in the future regarding this app. The lack of webseeders - and the lack of torrent indexers.
 
