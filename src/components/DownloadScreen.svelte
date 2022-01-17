@@ -1,83 +1,65 @@
 <script lang="ts">
-	import type { MovieData } from '../types/types';
-	import type { Instance as TorrentClient, Torrent } from 'webtorrent';
+	import type { MovieData } from '../utils/types';
+	import type { Instance, Torrent } from 'webtorrent';
+	import { CurrentMovie, TorrentClient } from '../utils/stores';
 	import { onMount } from 'svelte';
-  import { assets } from '$app/paths';
+	import { assets } from '$app/paths';
 	import streamSaver from 'streamsaver';
-	import WebTorrent from 'webtorrent/webtorrent.min';
 
-	export let currentMovie: MovieData;
-	export let onCancel: () => void;
+	let client: Instance;
+	let movie: MovieData;
+	CurrentMovie.subscribe((m) => (movie = m));
+	TorrentClient.subscribe((c) => (client = c));
 
 	let collectingMetadata = true;
 	let progressElement: HTMLSpanElement;
+	let torrents = new Array<Torrent>();
 	let cancelDownload: () => void;
 	streamSaver.mitm = assets + '/mitm.html';
 
 	function publishCancelEvent(): void {
-    window.onbeforeunload = null;
-		if (onCancel) onCancel();
+    movie.selectedHash = null;
+    CurrentMovie.set(movie);
 		if (cancelDownload) cancelDownload();
 	}
 
 	onMount(() => {
-		let client: TorrentClient = new WebTorrent();
+    let torrent = client.torrents.find(t => t.infoHash === movie.selectedHash);
+    client.torrents.filter(t => t !== torrent).forEach(t => {
+      t.removeAllListeners();
+      t.destroy();
+    });
 
-    let torrents = new Array<Torrent>();
-    currentMovie.hashes.forEach((movie, i) => {
-      let torrent = client.add(movie, {
-        announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz']
-      });
-      torrents.push(torrent);
+		torrent.files.forEach((file) => {
+			if (file.name.endsWith('.mp4') || file.name.endsWith('.mkv')) {
+				let fileStream = streamSaver.createWriteStream(file.name, { size: file.length });
+				let writer = fileStream.getWriter();
 
-      torrent.on('ready', () => {
-        console.log(torrent.numPeers);        
-
-        torrents.splice(i, 1);
-        torrents.forEach(torrent => {
+				cancelDownload = window.onunload = () => {
+					writer.abort();
           torrent.removeAllListeners();
           torrent.destroy();
-        });
+				};
 
-        torrent.files.forEach((file) => {
-          if (file.name.endsWith('.mp4') || file.name.endsWith('.mkv')) {
-            let fileStream = streamSaver.createWriteStream(file.name, { size: file.length });
-            let writer = fileStream.getWriter();
+				file
+					.createReadStream()
+					.on('data', (data) => {
+						writer.write(data);
+					})
+					.on('end', () => writer.close());
 
-            window.onunload = cancelDownload = () => {
-              writer.abort();
-              torrent.removeAllListeners();
-              torrent.destroy();
-            };
+				return;
+			}
+		});
 
-            window.onbeforeunload = (evt) => {
-              if (file.downloaded !== file.length) {
-                evt.returnValue =
-                'Are you sure you want to cancel the download?';
-              }
-            };
-            
-            file.createReadStream()
-              .on('data', (data) => {
-                  writer.write(data);
-                })
-              .on('end', () => writer.close());
-              
-              return;
-            }
-          });
-          
-          collectingMetadata = false;
-          
-          torrent.on('download', () => {
-            if (progressElement)
-            {
-              let progress = Math.round(torrent.progress * 10000) / 100;
-              progressElement.style.width = `${progress}%`;
-            }
-          });
-        });
-      });
+		collectingMetadata = false;
+
+		torrent.on('download', () => {
+			if (progressElement) {
+				let progress = Math.round(torrent.progress * 10000) / 100;
+				progressElement.style.width = `${progress}%`;
+			}
+		});
 	});
 </script>
 
@@ -98,14 +80,14 @@
 	</span>
 	<img
 		class="h-24 mr-2 aspect-square object-cover rounded"
-		src={currentMovie.cover}
-		alt="{currentMovie.title} Cover"
+		src={movie.cover}
+		alt="{movie.title} Cover"
 	/>
 	<span class="flex flex-col h-full">
-		<span class="font-extrabold text-lg">{currentMovie.title} <br /></span>
+		<span class="font-extrabold text-lg">{movie.title} <br /></span>
 		<span class="flex flex-col justify-self-end mt-1">
-			<span class="text-sm">Year: {currentMovie.year}</span>
-			<span class="text-sm">Rating: {currentMovie.rating}/10</span>
+			<span class="text-sm">Year: {movie.year}</span>
+			<span class="text-sm">Rating: {movie.rating}/10</span>
 		</span>
 	</span>
 	{#if collectingMetadata}

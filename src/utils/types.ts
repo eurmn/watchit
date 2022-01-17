@@ -3,5 +3,8 @@ export interface MovieData {
   cover: string,
   year: number,
   rating: number,
-  hashes: string[]
+  imdb: string,
+  allHashes: string[],
+  selectedHash?: string,
+  bayInjected: boolean,
 };

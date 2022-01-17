@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { MovieData } from '../types/types';
+	import type { MovieData } from '../utils/types';
+  import { CurrentMovie } from '../utils/stores';
 	import axios from 'axios';
 
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let searching = false;
-	export let onMovieSelected: (movie: MovieData) => void;
 
 	let movies = new Array<MovieData>();
 
@@ -26,24 +26,24 @@
           query + '&sort_by=seeds')
 				.then((response) => {
 					let list: Array<any> = response.data.data.movies;
-					movies = list
-						.map((movie) => {
-              console.log(movie.torrents);
+					movies = list.map((movie) => {
 							return {
 								title: movie.title,
 								cover: movie.medium_cover_image,
 								rating: movie.rating,
 								year: movie.year,
-								hashes: movie.torrents.sort(
+                imdb: movie.imdb_code,
+								allHashes: movie.torrents.sort(
 									({ seedsA }: { seedsA: number }, { seedsB }: { seedsB: number }): number => {
 										return seedsB - seedsA;
 									}
 								).map(({ hash }: { hash: string }) => hash),
+                bayInjected: false
 							};
 						})
 						.sort((a, b) => {
 							return b.rating - a.rating;
-						});      
+						});
 				})
 				.catch(console.log);
 		}, 1000);
@@ -57,7 +57,7 @@
 		// i just learned you can access indexes using strings and
 		// i just can't stop crying
 		let movie = movies[event.currentTarget.dataset.index];
-		onMovieSelected(movie);
+    CurrentMovie.set(movie);
 	}
 </script>
 

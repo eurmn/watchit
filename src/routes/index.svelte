@@ -1,14 +1,12 @@
 <script lang="ts">
-  import type { MovieData } from '../types/types';
+	import type { MovieData } from '../utils/types';
+	import { CurrentMovie } from '../utils/stores';
 	import SearchBar from '../components/SearchBar.svelte';
-	import ProgressBar from '../components/ProgressBar.svelte';
+	import DownloadScreen from '../components/DownloadScreen.svelte';
+	import SelectTorrent from '../components/SelectTorrent.svelte';
 
-	let currentMovie: MovieData | null = null;
-
-	function handleMovieSelected(movie: MovieData): void {
-		console.log('Movie Selected: ', movie.title);
-		currentMovie = movie;
-	}
+	let currentMovie: MovieData;
+  CurrentMovie.subscribe(m => currentMovie = m);
 </script>
 
 <svelte:head>
@@ -17,8 +15,12 @@
 
 <main class="p-5 w-full h-full bg-slate-200 text-slate-900 flex justify-center">
 	{#if currentMovie}
-		<ProgressBar currentMovie={currentMovie} onCancel={() => currentMovie = null} />
+		{#if currentMovie.selectedHash}
+			<DownloadScreen />
+		{:else}
+      <SelectTorrent />
+    {/if}
 	{:else}
-		<SearchBar onMovieSelected={handleMovieSelected} />
+		<SearchBar />
 	{/if}
 </main>
