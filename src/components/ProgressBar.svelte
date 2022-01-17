@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { MovieData } from '../types/types';
-	import type { Instance as TorrentClient } from 'webtorrent';
+	import type { Instance as TorrentClient, Torrent } from 'webtorrent';
 	import { onMount } from 'svelte';
+  import { assets } from '$app/paths';
 	import streamSaver from 'streamsaver';
 	import WebTorrent from 'webtorrent/webtorrent.min';
 
@@ -11,58 +12,72 @@
 	let collectingMetadata = true;
 	let progressElement: HTMLSpanElement;
 	let cancelDownload: () => void;
-	streamSaver.mitm = './mitm.html';
+	streamSaver.mitm = assets + '/mitm.html';
 
 	function publishCancelEvent(): void {
+    window.onbeforeunload = null;
 		if (onCancel) onCancel();
 		if (cancelDownload) cancelDownload();
 	}
 
 	onMount(() => {
 		let client: TorrentClient = new WebTorrent();
-		let torrent = client.add(currentMovie.hashes[0], {
-			announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz']
-		});
 
-		window.addEventListener('unload', () => torrent.destroy());
+    let torrents = new Array<Torrent>();
+    currentMovie.hashes.forEach((movie, i) => {
+      let torrent = client.add(movie, {
+        announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz']
+      });
+      torrents.push(torrent);
 
-		torrent.on('ready', () => {
-			torrent.files.forEach((file) => {
-				if (file.name.endsWith('.mp4') || file.name.endsWith('.mkv')) {
-					let fileStream = streamSaver.createWriteStream(file.name, { size: file.length });
-					let writer = fileStream.getWriter();
+      torrent.on('ready', () => {
+        console.log(torrent.numPeers);        
 
-					window.onunload = cancelDownload = () => {
-						fileStream.abort();
-            writer.abort();
-					};
+        torrents.splice(i, 1);
+        torrents.forEach(torrent => {
+          torrent.removeAllListeners();
+          torrent.destroy();
+        });
 
-					window.onbeforeunload = (evt) => {
-						if (file.downloaded !== file.length) {
-							evt.returnValue =
-								'Are you sure you want to cancel the download?';
-						}
-					};
+        torrent.files.forEach((file) => {
+          if (file.name.endsWith('.mp4') || file.name.endsWith('.mkv')) {
+            let fileStream = streamSaver.createWriteStream(file.name, { size: file.length });
+            let writer = fileStream.getWriter();
 
-					file
-						.createReadStream()
-						.on('data', (data) => {
-							writer.write(data);
-						})
-						.on('end', () => writer.close());
+            window.onunload = cancelDownload = () => {
+              writer.abort();
+              torrent.removeAllListeners();
+              torrent.destroy();
+            };
 
-					return;
-				}
-			});
-
-			collectingMetadata = false;
-
-			torrent.on('download', () => {
-				let progress = Math.round(torrent.progress * 10000) / 100;
-				console.log(`${progress}%`);
-				progressElement.style.width = `${progress}%`;
-			});
-		});
+            window.onbeforeunload = (evt) => {
+              if (file.downloaded !== file.length) {
+                evt.returnValue =
+                'Are you sure you want to cancel the download?';
+              }
+            };
+            
+            file.createReadStream()
+              .on('data', (data) => {
+                  writer.write(data);
+                })
+              .on('end', () => writer.close());
+              
+              return;
+            }
+          });
+          
+          collectingMetadata = false;
+          
+          torrent.on('download', () => {
+            if (progressElement)
+            {
+              let progress = Math.round(torrent.progress * 10000) / 100;
+              progressElement.style.width = `${progress}%`;
+            }
+          });
+        });
+      });
 	});
 </script>
 

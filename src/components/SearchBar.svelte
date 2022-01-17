@@ -13,7 +13,7 @@
 			currentTarget: EventTarget & HTMLInputElement;
 		}
 	) {
-		let query = event.currentTarget.value;
+		let query = encodeURI(event.currentTarget.value);
 		if (query === '') {
 			movies = [];
 			return;
@@ -28,6 +28,7 @@
 					let list: Array<any> = response.data.data.movies;
 					movies = list
 						.map((movie) => {
+              console.log(movie.torrents);
 							return {
 								title: movie.title,
 								cover: movie.medium_cover_image,
