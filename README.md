@@ -11,4 +11,4 @@ The first one - lack of webseeders - is most certanly the worst problem in this 
 
 The best solution to this could be simply to try more torrent hashes, and stick with the one which finds webseeders. And that's where the second problem - the lack of torrent indexers - comes in. While yts.mx's API is a great indexer, it is kind of the only one (I've found so far) with a good JSON API.
 
-While [The Pirate Bay](https://thepiratebay.org/index.html) also has a good JSON API, it is blocked by [CORS](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/CORS), which means it is not by client-only apps.
+While [The Pirate Bay](https://thepiratebay.org/index.html) also has a good JSON API, it is blocked by [CORS](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/CORS), which means it is not accessible by client-only apps.
