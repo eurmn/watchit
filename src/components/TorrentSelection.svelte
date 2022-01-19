@@ -17,22 +17,18 @@
     currentTarget: EventTarget & HTMLSelectElement;
   }) {
     movie.selectedHash = event.currentTarget.value;
-    client.torrents.filter(t => t.infoHash != movie.selectedHash).forEach(t => {
-      t.removeAllListeners();
-      t.destroy();
-    });
-    TorrentClient.set(client);
     CurrentMovie.set(movie);
   }
 
   onMount(async () => {
     movie.allHashes.forEach(hash => {
       let torrent = client.add(hash, {
-				announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz']
+				announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz'],
 			});
       torrent.once('metadata', () => {
         loadedTorrents = [...loadedTorrents, torrent];
-        torrent.pause();
+        torrent.removeAllListeners();
+        torrent.destroy();
       });
       TorrentClient.set(client);
     });
@@ -65,7 +61,7 @@
   <select class="h-full w-full p-1 rounded outline outline-1 outline-slate-300 bg-gradient-to-tr from-slate-100 to-white
     text-center" on:change={selectHash}>
     <option value="">Select an option</option>
-    {#each loadedTorrents as torrent, i}
+    {#each loadedTorrents as torrent}
       <option value="{torrent.infoHash}">{torrent.name} ({btsz(torrent.length)})</option>
     {/each}
   </select>
