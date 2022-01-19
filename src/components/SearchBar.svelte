@@ -27,23 +27,19 @@
 				.then((response) => {
 					let list: Array<any> = response.data.data.movies;
 					movies = list.map((movie) => {
-							return {
-								title: movie.title,
-								cover: movie.medium_cover_image,
-								rating: movie.rating,
-								year: movie.year,
-                imdb: movie.imdb_code,
-								allHashes: movie.torrents.sort(
-									({ seedsA }: { seedsA: number }, { seedsB }: { seedsB: number }): number => {
-										return seedsB - seedsA;
-									}
-								).map(({ hash }: { hash: string }) => hash),
-                bayInjected: false
-							};
-						})
-						.sort((a, b) => {
-							return b.rating - a.rating;
-						});
+            let torrents = movie.torrents.sort(({ seedsA }: { seedsA: number }, { seedsB }: { seedsB: number }): number => {
+              return seedsB - seedsA;
+            });
+            let hashes: string[] = torrents.map(({ hash }: { hash: string }) => hash);
+            return {
+              title: movie.title,
+              cover: movie.medium_cover_image,
+              rating: movie.rating,
+              year: movie.year,
+              imdb: movie.imdb_code,
+              allHashes: hashes,
+            };
+            }).sort((a, b) => (b.rating - a.rating));
 				})
 				.catch(console.log);
 		}, 1000);
@@ -54,7 +50,7 @@
 			currentTarget: EventTarget & HTMLDivElement;
 		}
 	) {
-		// i just learned you can access indexes using strings and
+		// i just learned js can access indexes using strings and
 		// i just can't stop crying
 		let movie = movies[event.currentTarget.dataset.index];
     CurrentMovie.set(movie);

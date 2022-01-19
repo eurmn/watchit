@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { MovieData } from '../utils/types';
-	import type { Instance, Torrent } from 'webtorrent';
+	import type { Instance } from 'webtorrent';
 	import { CurrentMovie, TorrentClient } from '../utils/stores';
 	import { onMount } from 'svelte';
 	import { assets } from '$app/paths';
@@ -13,22 +13,16 @@
 
 	let collectingMetadata = true;
 	let progressElement: HTMLSpanElement;
-	let torrents = new Array<Torrent>();
 	let cancelDownload: () => void;
 	streamSaver.mitm = assets + '/mitm.html';
 
 	function publishCancelEvent(): void {
-    movie.selectedHash = null;
-    CurrentMovie.set(movie);
+    CurrentMovie.set(null);
 		if (cancelDownload) cancelDownload();
 	}
 
 	onMount(() => {
-    let torrent = client.torrents.find(t => t.infoHash === movie.selectedHash);
-    client.torrents.filter(t => t !== torrent).forEach(t => {
-      t.removeAllListeners();
-      t.destroy();
-    });
+    let torrent = client.torrents[0];
 
 		torrent.files.forEach((file) => {
 			if (file.name.endsWith('.mp4') || file.name.endsWith('.mkv')) {
@@ -50,6 +44,7 @@
 
 				return;
 			}
+      file.deselect();
 		});
 
 		collectingMetadata = false;

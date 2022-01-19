@@ -6,5 +6,4 @@ export interface MovieData {
   imdb: string,
   allHashes: string[],
   selectedHash?: string,
-  bayInjected: boolean,
 };

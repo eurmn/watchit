@@ -4,4 +4,4 @@ import WebTorrent from 'webtorrent/webtorrent.min';
 import type { MovieData } from './types';
 
 export const TorrentClient = writable<Instance>(new WebTorrent());
-export let CurrentMovie = writable<MovieData | null>();
+export const CurrentMovie = writable<MovieData | null>();
