@@ -3,7 +3,7 @@
 	import { CurrentMovie } from '../utils/stores';
 	import SearchBar from '../components/SearchBar.svelte';
 	import DownloadScreen from '../components/DownloadScreen.svelte';
-	import SelectTorrent from '../components/SelectTorrent.svelte';
+	import SelectTorrent from '../components/TorrentSelection.svelte';
 
 	let currentMovie: MovieData;
   CurrentMovie.subscribe(m => currentMovie = m);
