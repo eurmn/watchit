@@ -16,6 +16,9 @@ const config = {
     floc: false,
 		// hydrate the <div id="svelte"> element in src/app.html
 		target: '#svelte',
+    paths: {
+      base: dev ? '' : '/watchit',
+    },
   },
 };
 
