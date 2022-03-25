@@ -1,8 +1,3 @@
-/** @type {import('@sveltejs/kit').Handle} */
-export async function handle({ request, resolve }) {
-	const response = await resolve(request, {
-		ssr: false
-	});
-
-	return response;
+export async function handle({ event, resolve }) {
+  return await resolve(event, { ssr: false });
 }

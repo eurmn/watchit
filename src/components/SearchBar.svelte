@@ -65,6 +65,7 @@
   on:blur={() => (searching = false)}
 >
 	<input
+    placeholder="Search a movie <3"
 		autocomplete="off"
 		type="text"
 		class="outline outline-1 outline-slate-300 focus:outline-sky-600

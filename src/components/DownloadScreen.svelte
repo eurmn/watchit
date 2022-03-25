@@ -26,7 +26,7 @@
       announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz'],
     });
 
-    torrent.once('metadata', () => {      
+    torrent.once('metadata', () => {
       torrent.files.forEach((file) => {
 			if (file.name.endsWith('.mp4') || file.name.endsWith('.mkv')) {
 				let fileStream = streamSaver.createWriteStream(file.name, { size: file.length });

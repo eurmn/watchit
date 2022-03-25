@@ -3,7 +3,9 @@
   import type { MovieData } from 'src/utils/types';
   import { TorrentClient, CurrentMovie } from '../utils/stores';
   import { onMount } from 'svelte';
+	import { assets } from '$app/paths';
   import btsz from 'byte-size';
+  import axios from 'axios';
 
   let client: Instance;
   let movie: MovieData;
@@ -20,39 +22,30 @@
     CurrentMovie.set(movie);
   }
 
-  onMount(async () => {
-    movie.allHashes.forEach(hash => {
+  let hashAmount = movie.allHashes.length;
+  onMount(() => {
+    setTimeout(() => message = 'This is taking too long, the selected movie most likely has no active webseeders.', 60 * 2 * 1000);
+
+    const handleHash = (hash: string) =>
+    {
       let torrent = client.add(hash, {
-				announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz'],
-			});
+        announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz'],
+      });
+
       torrent.once('metadata', () => {
         loadedTorrents = [...loadedTorrents, torrent];
         torrent.removeAllListeners();
         torrent.destroy();
       });
       TorrentClient.set(client);
+    };
+    
+    movie.allHashes.forEach(handleHash);
+    axios.get(`${assets}/torrents?q=${movie.imdb}`).then(response => {
+      let newHashes: string[] = response.data.filter(hash => !movie.allHashes.includes(hash));
+      newHashes.forEach(handleHash);
+      hashAmount += newHashes.length;
     });
-
-    setTimeout(() => message = 'This is taking too long, the selected movie most likely has no active webseeders.', 60 * 2 * 1000);
-
-    // DEAD LINK
-    /* let response = await axios.get(
-				'https://add-cors-header.herokuapp.com/' +
-					encodeURI(`https://apibay.org/q.php?q=${movie.imdb}&cat=200`)
-			);
-    let eligibleTorrents = response.data.filter((torrent) => parseInt(torrent.seeders) >= 1);
-    let newHashes: string[] = eligibleTorrents.map((torrent) => torrent.info_hash);
-    newHashes.forEach((hash: string) => {
-      if (movie.allHashes.includes(hash)) return;
-      let torrent = client.add(hash, {
-				announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz']
-			});
-      TorrentClient.set(client);
-      torrent.once('metadata', () => {
-        loadedTorrents = [...loadedTorrents, torrent];
-        torrent.pause();
-      });
-    }); */
   });
 </script>
 
@@ -66,7 +59,7 @@
     {/each}
   </select>
   <div class="w-full text-center text-slate-600 text-sm">
-    {movie.allHashes.length - loadedTorrents.length} more option{movie.allHashes.length - loadedTorrents.length == 1 ? '' : 's'} awaiting validation
+    {hashAmount - loadedTorrents.length} more option{hashAmount - loadedTorrents.length == 1 ? '' : 's'} awaiting validation
   </div>
 </div>
 {:else}
