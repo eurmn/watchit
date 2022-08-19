@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { MovieData } from '../utils/types';
-  import { CurrentMovie } from '../utils/stores';
+  	import { CurrentMovie } from '../utils/stores';
 	import axios from 'axios';
 
 	let searchTimeout: ReturnType<typeof setTimeout>;
@@ -65,12 +65,12 @@
   on:blur={() => (searching = false)}
 >
 	<input
-    placeholder="Search a movie <3"
+    placeholder="Search a movie ❤"
 		autocomplete="off"
 		type="text"
-		class="outline outline-1 outline-slate-300 focus:outline-sky-600
-      focus:outline-2 p-2 drop-shadow-sm h-10 w-full sm:w-1/2 rounded
-      bg-gradient-to-tr from-slate-100 to-white"
+		class="outline outline-1 outline-slate-300 focus:outline-indigo-600
+      focus:outline-2 px-2 drop-shadow-sm h-10 w-full sm:w-1/2 rounded
+      bg-gradient-to-tr from-slate-100 to-white border-0 text-lg placeholder:text-slate-400"
 		on:input={searchTorrent}
 	/>
 	{#if movies.length > 0 && searching}

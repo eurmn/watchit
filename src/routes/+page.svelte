@@ -4,6 +4,7 @@
 	import SearchBar from '../components/SearchBar.svelte';
 	import DownloadScreen from '../components/DownloadScreen.svelte';
 	import SelectTorrent from '../components/TorrentSelection.svelte';
+	import 'uno.css';
 
 	let currentMovie: MovieData;
   CurrentMovie.subscribe(m => currentMovie = m);

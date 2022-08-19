@@ -1,87 +1,118 @@
 <script lang="ts">
-  import type { Instance, Torrent } from 'webtorrent';
-  import type { MovieData } from 'src/utils/types';
-  import { TorrentClient, CurrentMovie } from '../utils/stores';
-  import { onMount } from 'svelte';
-	import { assets } from '$app/paths';
-  import btsz from 'byte-size';
-  import axios from 'axios';
+  import type { Instance, Torrent } from "webtorrent";
+  import type { MovieData } from "src/utils/types";
+  import { TorrentClient, CurrentMovie } from "../utils/stores";
+  import { onMount } from "svelte";
+  import btsz from "byte-size";
+  import axios from "axios";
 
   let client: Instance;
   let movie: MovieData;
-  CurrentMovie.subscribe(m => movie = m);
-  TorrentClient.subscribe(c => client = c);
+  CurrentMovie.subscribe((m) => (movie = m));
+  TorrentClient.subscribe((c) => (client = c));
 
   let loadedTorrents = new Array<Torrent>();
-  let message = '';
+  let message = "";
 
-  function selectHash(event: Event & {
-    currentTarget: EventTarget & HTMLSelectElement;
-  }) {
+  function selectHash(
+    event: Event & {
+      currentTarget: EventTarget & HTMLSelectElement;
+    }
+  ) {
     movie.selectedHash = event.currentTarget.value;
     CurrentMovie.set(movie);
   }
 
   let hashAmount = movie.allHashes.length;
   onMount(() => {
-    setTimeout(() => message = 'This is taking too long, the selected movie most likely has no active webseeders.', 60 * 2 * 1000);
+    let timeout = setTimeout(() => {
+      message =
+        "This is taking too long, the selected movie most likely has no active webseeders.";
+      clearTimeout(timeout);
+    }, 60 * 2 * 1000);
 
-    const handleHash = (hash: string) =>
-    {
+    const handleHash = (hash: string) => {
       let torrent = client.add(hash, {
-        announce: ['wss://tracker.openwebtorrent.com', 'wss://tracker.btorrent.xyz'],
+        announce: 
+        // ["ws://34.139.224.29:1211"]
+        [
+          "wss://tracker.fastcast.nz",
+          "wss://tracker.openwebtorrent.com",
+          "wss://tracker.btorrent.xyz",
+          "wss://webtorrent-tracker.onrender.com",
+        ],
       });
 
-      torrent.once('metadata', () => {
+      torrent.once("metadata", () => {
         loadedTorrents = [...loadedTorrents, torrent];
         torrent.removeAllListeners();
         torrent.destroy();
       });
       TorrentClient.set(client);
     };
-    
+
     movie.allHashes.forEach(handleHash);
-    axios.get(`${assets}/torrents?q=${movie.imdb}`).then(response => {
-      let newHashes: string[] = response.data.filter(hash => !movie.allHashes.includes(hash));
-      newHashes.forEach(handleHash);
-      hashAmount += newHashes.length;
-    });
+    // fetch piratebay (proxied by a serverless function).
+    axios
+      .get(
+        `https://us-central1-watchit-814ae.cloudfunctions.net/torrents?q=${movie.imdb}`
+      )
+      .then((response) => {
+        console.log(response.data);
+        let newHashes: string[] = response.data.filter(
+          (hash) => !movie.allHashes.includes(hash)
+        );
+        newHashes.forEach(handleHash);
+        hashAmount += newHashes.length;
+      });
   });
+
+  function clearAll() {
+    window.location.reload();
+  }
 </script>
 
+<div
+  class="absolute top-2 left-2 text-indigo-6 flex items-center text-3xl cursor-pointer active:scale-90 transition-transform"
+  on:click={(e) => clearAll()}
+>
+  <div class="i-gg:arrow-left float-left" />
+  <span class="text-xl">back</span>
+</div>
 {#if loadedTorrents.length >= 1}
-<div class="h-10 w-full sm:w-1/2 justify-self-center self-center ">
-  <select class="h-full w-full p-1 rounded outline outline-1 outline-slate-300 bg-gradient-to-tr from-slate-100 to-white
-    text-center" on:change={selectHash}>
-    <option value="">Select an option</option>
-    {#each loadedTorrents as torrent}
-      <option value="{torrent.infoHash}">{torrent.name} ({btsz(torrent.length)})</option>
-    {/each}
-  </select>
-  <div class="w-full text-center text-slate-600 text-sm">
-    {hashAmount - loadedTorrents.length} more option{hashAmount - loadedTorrents.length == 1 ? '' : 's'} awaiting validation
+  <div class="h-10 w-full sm:w-1/2 justify-self-center self-center ">
+    <select
+      class="h-full w-full p-1 rounded outline outline-1 outline-slate-300 bg-gradient-to-tr from-slate-100 to-white
+      text-center border-0"
+      on:change={selectHash}
+    >
+      <option value="">Select an option</option>
+      {#each loadedTorrents as torrent}
+        <option value={torrent.infoHash}
+          >{torrent.name} ({btsz(torrent.length)})</option
+        >
+      {/each}
+    </select>
+    <div class="w-full text-center text-slate-600 text-sm">
+      {hashAmount - loadedTorrents.length} more option{hashAmount -
+        loadedTorrents.length ==
+      1
+        ? ""
+        : "s"} awaiting validation
+    </div>
   </div>
-</div>
 {:else}
-<div class="justify-self-center self-center text-slate-600">
-  <svg class="animate-spin icon icon-spinner9">
-    <symbol id="icon-spinner9" viewBox="0 0 32 32">
-      <path
-      d="M16 0c-8.711 0-15.796 6.961-15.995 15.624 0.185-7.558 5.932-13.624 12.995-13.624 7.18 0 13 6.268 13 14 0 1.657 1.343 3 3 3s3-1.343 3-3c0-8.837-7.163-16-16-16zM16 32c8.711 0 15.796-6.961 15.995-15.624-0.185 7.558-5.932 13.624-12.995 13.624-7.18 0-13-6.268-13-14 0-1.657-1.343-3-3-3s-3 1.343-3 3c0 8.837 7.163 16 16 16z"
-      />
-    </symbol>
-    <use xlink:href="#icon-spinner9" />
-  </svg> {message}
-</div>
+  <div class="justify-self-center self-center">
+    <div
+      class="i-gg:spinner text-indigo-6 text-3xl animate-spin animate-duration-700 mx-auto mb-5"
+    />
+    {#if message}
+      <div
+        class="w-full text-center rounded bg-indigo text-white p-2 drop-shadow shadow-black/20"
+      >
+        <div class="i-gg:bell text-xl float-left" />
+        {message}
+      </div>
+    {/if}
+  </div>
 {/if}
-
-<style>
-  .icon {
-		display: inline-block;
-		width: 1em;
-		height: 1em;
-		stroke-width: 0;
-		stroke: currentColor;
-		fill: currentColor;
-	}
-</style>

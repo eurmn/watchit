@@ -1,11 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;800&display=swap');
 
-/* Write your styles here, in PostCSS syntax */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-html {
+* {
   font-family: 'Open Sans', sans-serif;
 }
 
@@ -13,4 +8,5 @@ html, body, #svelte {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  margin: 0;
 }

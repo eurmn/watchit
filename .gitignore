@@ -6,6 +6,5 @@ node_modules
 .env
 .env.*
 !.env.example
-/yarn.lock
-/yarn-error.log
-/pnpm-lock.yaml
+
+pnpm-lock.yaml
