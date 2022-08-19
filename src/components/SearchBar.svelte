@@ -58,7 +58,7 @@
 </script>
 
 <div
-	class="transition-transform duration-500
+	class="mx-5 transition-transform duration-500
     w-full flex flex-col items-center translate-y-1/3 ease-out
     {movies.length > 0 ? 'translate-y-0' : 'translate-y-1/3'}"
   on:focusin={() => (searching = true)}

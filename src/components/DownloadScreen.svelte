@@ -72,17 +72,17 @@
   });
 </script>
 
-<div class="self-center w-full sm:w-1/2">
+<div class="mx-5 self-center w-full sm:w-1/2">
   <div
     class="bg-gradient-to-tr from-slate-100 to-white flex align-center
         p-2 w-full outline outline-1 outline-slate-300
-        drop-shadow-sm relative pb-3 rounded"
+        drop-shadow-sm pb-3 rounded box-border"
   >
     <span
-      class="absolute top-1 right-1 text-slate-400 cursor-pointer"
+      class="absolute top-.5 right-.5 text-slate-400 cursor-pointer"
       on:click={publishCancelEvent}
     >
-      <div class="i-gg:close text-indigo-6 font-bold text-xl" />
+      <div class="i-gg:close text-indigo-6 font-bold" />
     </span>
     <img
       class="h-24 mr-2 aspect-square object-cover rounded"

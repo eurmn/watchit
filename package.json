@@ -10,12 +10,13 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "eslint .",
-		"deploy": "pmpm run build && type nul > build/.nojekyll && gh-pages -t -d build"
+		"deploy": "pnpm run build && type nul > build/.nojekyll && gh-pages -t -d build"
 	},
 	"devDependencies": {
 		"@iconify-json/gg": "^1.1.2",
 		"@playwright/test": "^1.25.0",
 		"@sveltejs/adapter-auto": "next",
+		"@sveltejs/adapter-static": "1.0.0-next.39",
 		"@sveltejs/kit": "next",
 		"@types/byte-size": "^8.1.0",
 		"@types/streamsaver": "^2.0.1",

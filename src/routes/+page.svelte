@@ -14,7 +14,7 @@
 	<title>watchit</title>
 </svelte:head>
 
-<main class="p-5 w-full h-full bg-slate-200 text-slate-900 flex justify-center">
+<main class="w-full h-full bg-slate-200 text-slate-900 flex justify-center">
 	{#if currentMovie}
 		{#if currentMovie.selectedHash}
 			<DownloadScreen />

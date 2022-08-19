@@ -79,8 +79,9 @@
   <div class="i-gg:arrow-left float-left" />
   <span class="text-xl">back</span>
 </div>
+
 {#if loadedTorrents.length >= 1}
-  <div class="h-10 w-full sm:w-1/2 justify-self-center self-center ">
+  <div class="mx-5 h-10 w-full sm:w-1/2 justify-self-center self-center ">
     <select
       class="h-full w-full p-1 rounded outline outline-1 outline-slate-300 bg-gradient-to-tr from-slate-100 to-white
       text-center border-0"

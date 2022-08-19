@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-static';
 import preprocess from 'svelte-preprocess';
 
 const dev = process.env.VITE_MODE === 'development';
@@ -10,7 +10,9 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
-		adapter: adapter(),
+		adapter: adapter({
+			fallback: '200.html'
+		}),
 		paths: {
 			base: dev ? '' : '/watchit',
 		},
